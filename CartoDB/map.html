@@ -1,0 +1,55 @@
+<html>
+<head>
+  <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
+  <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
+  <!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v2/themes/css/cartodb.ie.css" />
+  <![endif]-->
+  <style>
+    html, body {width:100%; height:100%; padding: 0; margin: 0;}
+    #cartodb-map { width: 100%; height:100%; background: black;}
+  </style>
+
+  <script>
+    var map;
+    function init(){
+      // initiate leaflet map
+      map = new L.Map('cartodb-map', { 
+        center: [25,80],
+        zoom: 4
+      }); 
+
+      L.tileLayer('https://dnv9my2eseobd.cloudfront.net/v3/cartodb.map-4xtxp73f/{z}/{x}/{y}.png', {
+        attribution: 'Mapbox <a href="http://mapbox.com/about/maps" target="_blank">Terms &amp; Feedback</a>'
+      }).addTo(map);
+
+      // var layerUrl = 'https://hc12298.cartodb.com/api/v2/viz/812fd350-e8de-11e4-9703-0e853d047bba/viz.json';
+
+      var layer = {
+          user_name: 'hc12298', // Required
+          type: 'cartodb', // Required
+          sublayers: [{
+               sql: "SELECT * FROM out_1", // Required
+               cartocss: '#out_1 {marker-fill: #666699;}', // Required
+               // interactivity: "column1, column2, ...", // Optional
+          }]
+      }
+
+      cartodb.createLayer(map, layer)
+          .addTo(map)
+          .on('done', function(layer) {
+               // layer.getSubLayer(0).set(subLayerOptions);
+               // Console.log('done');
+          })
+          .on('error', function() {
+               //log the error
+               alert('Some error occurred');
+        });
+    }  
+  </script>
+</head>
+
+<body onload="init()">
+  <div id='cartodb-map'></div>
+</body>
+</html>

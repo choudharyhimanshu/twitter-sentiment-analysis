@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      .stats{
+        position: fixed;
+        top: 5%;
+        left: 2%;
+        /*width: 400px;*/
+        padding: 20px;
+        height: auto;
+        text-align: center;
+        z-index: 1000;
+        background-color: white;
+        box-shadow: 0 0 .4em #99CCFF;
+        -webkit-box-shadow :0 0 .4em #99CCFF;
+        -moz-box-shadow: 0 0 .4em #99CCFF;
+      }
+    </style>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+    <script>
+var count_posi=0;
+var count_neg=0;
+var count_neut=0;
+
+var map;
+var mapStyle = [{
+  'featureType': 'all',
+  'elementType': 'all',
+  'stylers': [{'visibility': 'off'}]
+}, {
+  'featureType': 'landscape',
+  'elementType': 'geometry',
+  'stylers': [{'visibility': 'on'}, {'color': '#fcfcfc'}]
+}, {
+  'featureType': 'water',
+  'elementType': 'labels',
+  'stylers': [{'visibility': 'off'}]
+}, {
+  'featureType': 'water',
+  'elementType': 'geometry',
+  'stylers': [{'visibility': 'on'}, {'hue': '#5f94ff'}, {'lightness': 60}]
+}];
+
+google.maps.event.addDomListener(window, 'load', function() {
+  map = new google.maps.Map(document.getElementById('map-canvas'), {
+    center: { lat: 25, lng: 80 },
+    zoom: 4,
+    styles: mapStyle
+  });
+
+  map.data.setStyle(styleFeature);
+
+  // Get the earthquake data (JSONP format)
+  // This feed is a copy from the USGS feed, you can find the originals here:
+  //   http://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
+  var script = document.createElement('script');
+  script.setAttribute('src',
+    'out.GEOJSON');
+  document.getElementsByTagName('head')[0].appendChild(script);
+
+  document.getElementById('stats').innerHTML = "<b>Stats</b><br>Positive : "+count_posi+"<br>Negative : "+count_neg+"<br>Neutral : "+count_neut;
+});
+
+// Defines the callback function referenced in the jsonp file.
+function eqfeed_callback(data) {
+  map.data.addGeoJson(data);
+}
+
+function styleFeature(feature) {
+  var low = [151, 83, 34];   // color of mag 1.0
+  var high = [5, 69, 54];
+  var color;
+
+  // fraction represents where the value sits between the min and max
+  var scal;
+  if (feature.getProperty('mood') == "Positive") {color = 'hsl(110, 100%, 33%)';count_posi++;}
+  else if (feature.getProperty('mood') == "Neutral") {color = 'hsl(216, 100%, 33%)';count_neut++;}
+  else {color = 'hsl(360, 100%, 55%)';count_neg++;}
+  // var fraction = scal/100;
+  // var color = interpolateHsl(low, high, fraction);
+   
+  document.getElementById('stats').innerHTML = "<b>Stats</b><br>Positive : "+count_posi+"<br>Negative : "+count_neg+"<br>Neutral : "+count_neut;
+  return {
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      strokeWeight: 0.5,
+      strokeColor: '#fff',
+      fillColor: color,
+      fillOpacity: 1,
+      scale: 5
+    },
+    zIndex: feature.getProperty('mood_scale')
+  };
+}
+
+// function interpolateHsl(lowHsl, highHsl, fraction) {
+//   var color = [];
+//   for (var i = 0; i < 3; i++) {
+//     // Calculate color based on the fraction.
+//     color[i] = (highHsl[i] - lowHsl[i]) * fraction + lowHsl[i];
+//   }
+
+//   return 'hsl(' + color[0] + ',' + color[1] + '%,' + color[2] + '%)';
+// }
+
+    </script>
+  </head>
+  <body id="map-container">
+    <div class="stats" id="stats">
+      
+    </div>
+    <div id="map-canvas"></div>
+  </body>
+</html>
